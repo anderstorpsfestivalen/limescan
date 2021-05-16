@@ -1,4 +1,6 @@
-#include <Adafruit_NeoPixel.h>
+#include <FastLED.h>
+
+#define NUM_LEDS 32
 
 struct StatusCode {
   int r;
@@ -13,4 +15,8 @@ const StatusCode NFC = StatusCode{0, 255, 255};
 const StatusCode SUCCESS = StatusCode{0, 255, 0};
 const StatusCode CLEAR = StatusCode{0, 0, 0};
 
-void setStatus(Adafruit_NeoPixel p, StatusCode s);
+void setStatus( StatusCode s);
+void spinStatus();
+void initStatus();
+
+void flash();
