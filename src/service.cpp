@@ -3,11 +3,15 @@
 BLEService scanService = BLEService(scanServiceUUID);
 BLECharacteristic scanCharacteristic = BLECharacteristic(scanCharacteristicUUID);
 BLECharacteristic callbackCharacteristic = BLECharacteristic(callbackUUID);
+datacb db;
+conncb conncallback;
 
 
 void initBLE()
 {
     Bluefruit.begin();
+    //Bluefruit.Periph.setConnectCallback(connect_callback);
+    //Bluefruit.Periph.setDisconnectCallback(disconnect_callback);
 
     scanService.begin();
 
@@ -25,6 +29,15 @@ void initBLE()
 
     startAdv();
 }
+
+void registerCallback(datacb c) {
+    db = c;
+}
+
+void registerConnectionCallback(conncb c) {
+    conncallback = c;
+}
+
 
 void startAdv(void)
 {
@@ -63,5 +76,15 @@ bool sendCard(const char *str)
 }
 
 void cb(uint16_t conn_hdl, BLECharacteristic* chr, uint8_t* data, uint16_t len) {
-    Serial.println(data[0]);
+    //db(data[0]);
+}
+
+
+void connect_callback(uint16_t conn_handle) {
+   // conncallback(true);
+}
+
+void disconnect_callback(uint16_t conn_handle, uint8_t reason)
+{
+   // conncallback(false);
 }

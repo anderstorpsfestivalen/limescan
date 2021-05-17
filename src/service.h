@@ -18,7 +18,8 @@ const uint8_t callbackUUID[] =
     0XDC, 0X42, 0XA9, 0X3C, 0XFC, 0X5F, 0X72, 0XA4,
     0X10, 0X42, 0XD5, 0XE3, 0XBF, 0X32, 0XF5, 0X35
 };
-
+typedef void (*datacb)(uint8_t);
+typedef void (*conncb)(bool);
 
 void initBLE();
 void startAdv();
@@ -26,3 +27,8 @@ void cccd_callback(uint16_t conn_hdl, BLECharacteristic* chr, uint16_t cccd_valu
 void cb(uint16_t conn_hdl, BLECharacteristic* chr, uint8_t* data, uint16_t len);
 
 bool sendCard(const char* str);
+void registerCallback(datacb c);
+void registerConnectionCallback(conncb c);
+
+void connect_callback(uint16_t conn_handle);
+void disconnect_callback(uint16_t conn_handle, uint8_t reason);

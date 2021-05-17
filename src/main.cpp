@@ -9,19 +9,11 @@
 #define PN532_RESET (6) 
 Adafruit_PN532 nfc(PN532_IRQ, PN532_RESET);
 
+void initNFC();
 void scanNFC();
-void showsuccess();
+void callback(uint8_t data);
 void array_to_string(byte array[], unsigned int len, char buffer[]);
 
-void heartbeat()
-{
-	if (Bluefruit.connected())
-	{
-		
-	}
-
-	delay(5000);
-}
 
 void setup()
 {
@@ -29,6 +21,27 @@ void setup()
 	digitalWrite(LED_RED, LOW);
 
 	Serial.println("Starting Limescan");
+
+	initNFC();
+
+	Scheduler.startLoop(scanNFC);
+
+	initStatus();
+	setStatus(CLEAR);
+
+	//registerCallback(callback);
+	//registerConnectionCallback(conn);
+	initBLE();
+}
+
+void loop()
+{
+	delay(50);
+	yield();
+}
+
+void initNFC()
+{
 	nfc.begin();
 
 	//Seems to be some SPI bug with the NRF52840 but this helps??
@@ -37,7 +50,7 @@ void setup()
 	if (!versiondata)
 	{
 		Serial.print("Didn't find PN53x board");
-		digitalToggle(LED_RED);
+		setStatus(ERROR);
 	}
 	// Got ok data, print it out!
 	Serial.print("Found chip PN5");
@@ -47,29 +60,8 @@ void setup()
 	Serial.print('.');
 	Serial.println((versiondata >> 8) & 0xFF, DEC);
 
-	nfc.SAMConfig();
-
-	delay(1000);
-
-	Scheduler.startLoop(scanNFC);
-
-	initStatus();
-	setStatus(SUCCESS);
-	delay(100);
-	setStatus(CLEAR);
-
-	initBLE();
-
-
-	Scheduler.startLoop(heartbeat);
+	nfc.SAMConfig();	
 }
-
-void loop()
-{
-	delay(50);
-	yield();
-}
-
 
 void scanNFC()
 {
@@ -80,11 +72,9 @@ void scanNFC()
 	{
 		char str[64] = "";
 		array_to_string(uid, uidLength, str);
-		Serial.println(str);
 		if (Bluefruit.connected())
 		{
 			sendCard(str);
-			flash();
 			delay(2000);
 		}
 	}
@@ -100,4 +90,11 @@ void array_to_string(byte array[], unsigned int len, char buffer[])
 		buffer[i * 2 + 1] = nib2 < 0xA ? '0' + nib2 : 'A' + nib2 - 0xA;
 	}
 	buffer[len * 2] = '\0';
+}
+
+void callback(uint8_t data) {
+	switch(data) {
+		case 0x01: flash(true);
+		case 0x02: flash(false);
+	}
 }

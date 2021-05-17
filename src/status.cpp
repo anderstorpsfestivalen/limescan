@@ -1,28 +1,64 @@
 #include "status.hpp"
 
 CRGB leds[NUM_LEDS];
+bool connected = false;
 
-void initStatus() {
-    FastLED.addLeds<NEOPIXEL, 9>(leds, NUM_LEDS);
+void initStatus()
+{
+	FastLED.addLeds<NEOPIXEL, 9>(leds, NUM_LEDS);
 }
 
 void setStatus(StatusCode s)
 {
-    for (int i = 0; i < NUM_LEDS; i++)
+	for (int i = 0; i < NUM_LEDS; i++)
 	{
 		leds[i] = CRGB(s.r, s.g, s.b);
 	}
-    FastLED.show();
+	FastLED.show();
 }
 
-void flash() {
-    for (int x = 35; x >= 0; x--)
+void box(CRGB color)
+{
+	if (connected)
+	{
+		for (int i = 0; i < sizeof(scanPattern); i++)
+		{
+			if (scanPattern[i])
+			{
+				leds[i] = color;
+			}
+		}
+	}
+	FastLED.show();
+}
+
+void flash(bool success)
+{
+	for (int x = 35; x >= 0; x--)
 	{
 		for (int i = 0; i < NUM_LEDS; i++)
 		{
-            leds[i] = CRGB(0, x, 0);
+			if (success)
+			{
+				leds[i] = CRGB(0, x, 0);
+			}
+			else
+			{
+				leds[i] = CRGB(x, 0, 0);
+			}
 		}
 		FastLED.show();
 		delay(40);
+	}
+	box(standardColor);
+}
+
+void conn(bool val)
+{
+	connected = val;
+	if(val) {
+		box(standardColor);
+	} else {
+		setStatus(CLEAR);
 	}
 }
