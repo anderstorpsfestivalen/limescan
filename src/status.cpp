@@ -50,7 +50,6 @@ void flash(bool success)
 		FastLED.show();
 		delay(40);
 	}
-	box(standardColor);
 }
 
 void conn(bool val)

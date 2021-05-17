@@ -29,8 +29,8 @@ void setup()
 	initStatus();
 	setStatus(CLEAR);
 
-	//registerCallback(callback);
-	//registerConnectionCallback(conn);
+	registerCallback(callback);
+	registerConnectionCallback(conn);
 	initBLE();
 }
 
@@ -72,6 +72,7 @@ void scanNFC()
 	{
 		char str[64] = "";
 		array_to_string(uid, uidLength, str);
+		Serial.println(str);
 		if (Bluefruit.connected())
 		{
 			sendCard(str);
@@ -94,7 +95,17 @@ void array_to_string(byte array[], unsigned int len, char buffer[])
 
 void callback(uint8_t data) {
 	switch(data) {
-		case 0x01: flash(true);
-		case 0x02: flash(false);
+		case 0x01:
+			flash(true);
+			setStatus(CLEAR);
+			break;
+		case 0x02:
+			flash(false);
+			box(standardColor);
+			break;
+		case 0x03:
+			box(standardColor);
+		default:
+			break;
 	}
 }

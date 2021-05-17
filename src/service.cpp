@@ -10,8 +10,8 @@ conncb conncallback;
 void initBLE()
 {
     Bluefruit.begin();
-    //Bluefruit.Periph.setConnectCallback(connect_callback);
-    //Bluefruit.Periph.setDisconnectCallback(disconnect_callback);
+    Bluefruit.Periph.setConnectCallback(connect_callback);
+    Bluefruit.Periph.setDisconnectCallback(disconnect_callback);
 
     scanService.begin();
 
@@ -76,15 +76,16 @@ bool sendCard(const char *str)
 }
 
 void cb(uint16_t conn_hdl, BLECharacteristic* chr, uint8_t* data, uint16_t len) {
-    //db(data[0]);
+    Serial.println(data[0]);
+    db(data[0]);
 }
 
 
 void connect_callback(uint16_t conn_handle) {
-   // conncallback(true);
+   conncallback(true);
 }
 
 void disconnect_callback(uint16_t conn_handle, uint8_t reason)
 {
-   // conncallback(false);
+   conncallback(false);
 }
