@@ -2,6 +2,8 @@
 
 BLEService scanService = BLEService(scanServiceUUID);
 BLECharacteristic scanCharacteristic = BLECharacteristic(scanCharacteristicUUID);
+BLECharacteristic callbackCharacteristic = BLECharacteristic(callbackUUID);
+
 
 void initBLE()
 {
@@ -13,6 +15,13 @@ void initBLE()
     scanCharacteristic.setPermission(SECMODE_OPEN, SECMODE_NO_ACCESS);
 
     scanCharacteristic.begin();
+
+    callbackCharacteristic.setProperties(CHR_PROPS_READ | CHR_PROPS_WRITE);
+    callbackCharacteristic.setPermission(SECMODE_OPEN, SECMODE_OPEN);
+    callbackCharacteristic.setFixedLen(1);
+    callbackCharacteristic.setWriteCallback(cb);
+
+    callbackCharacteristic.begin();
 
     startAdv();
 }
@@ -51,4 +60,8 @@ void startAdv(void)
 bool sendCard(const char *str)
 {
     return scanCharacteristic.notify(str);
+}
+
+void cb(uint16_t conn_hdl, BLECharacteristic* chr, uint8_t* data, uint16_t len) {
+    Serial.println(data[0]);
 }

@@ -3,49 +3,43 @@
 #include <SPI.h>
 #include <Adafruit_PN532.h>
 #include "service.h"
-//#include "status.hpp"
+#include "status.hpp"
 
+#define PN532_IRQ   (5)
+#define PN532_RESET (6) 
+Adafruit_PN532 nfc(PN532_IRQ, PN532_RESET);
 
-Adafruit_PN532 nfc(5);
-
-void initNFC();
 void scanNFC();
 void showsuccess();
 void array_to_string(byte array[], unsigned int len, char buffer[]);
 
+void heartbeat()
+{
+	if (Bluefruit.connected())
+	{
+		
+	}
+
+	delay(5000);
+}
+
 void setup()
 {
 	Serial.begin(115200);
+	digitalWrite(LED_RED, LOW);
 
 	Serial.println("Starting Limescan");
-
-	initBLE();
-
-	initNFC();
-
-	//initStatus();
-
-	Scheduler.startLoop(scanNFC);
-}
-
-void loop()
-{
-	delay(50);
-	yield();
-}
-
-void initNFC()
-{
-
 	nfc.begin();
 
+	//Seems to be some SPI bug with the NRF52840 but this helps??
+	nfc.getFirmwareVersion();
 	uint32_t versiondata = nfc.getFirmwareVersion();
 	if (!versiondata)
 	{
 		Serial.print("Didn't find PN53x board");
+		digitalToggle(LED_RED);
 	}
-	delay(100);
-
+	// Got ok data, print it out!
 	Serial.print("Found chip PN5");
 	Serial.println((versiondata >> 24) & 0xFF, HEX);
 	Serial.print("Firmware ver. ");
@@ -54,24 +48,46 @@ void initNFC()
 	Serial.println((versiondata >> 8) & 0xFF, DEC);
 
 	nfc.SAMConfig();
+
+	delay(1000);
+
+	Scheduler.startLoop(scanNFC);
+
+	initStatus();
+	setStatus(SUCCESS);
+	delay(100);
+	setStatus(CLEAR);
+
+	initBLE();
+
+
+	Scheduler.startLoop(heartbeat);
 }
+
+void loop()
+{
+	delay(50);
+	yield();
+}
+
 
 void scanNFC()
 {
 	uint8_t uid[] = {0, 0, 0, 0, 0, 0, 0}; // buffer to store the returned uid
-	uint8_t uidLength;	
+	uint8_t uidLength;
 
-	if (nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength, 3000))
+	if (nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength, 100))
 	{
+		char str[64] = "";
+		array_to_string(uid, uidLength, str);
+		Serial.println(str);
 		if (Bluefruit.connected())
 		{
-			char str[64] = "";
-			array_to_string(uid, uidLength, str);
 			sendCard(str);
+			flash();
+			delay(2000);
 		}
 	}
-
-	delay(2000);
 }
 
 void array_to_string(byte array[], unsigned int len, char buffer[])
