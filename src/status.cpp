@@ -34,7 +34,8 @@ void box(CRGB color)
 
 void flash(bool success)
 {
-	for (int x = 35; x >= 0; x--)
+	FastLED.setBrightness(30);
+	for (int x = 255; x >= 0; x--)
 	{
 		for (int i = 0; i < NUM_LEDS; i++)
 		{
@@ -48,8 +49,9 @@ void flash(bool success)
 			}
 		}
 		FastLED.show();
-		delay(40);
+		delay(5);
 	}
+	FastLED.setBrightness(255);
 }
 
 void conn(bool val)

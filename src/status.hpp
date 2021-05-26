@@ -1,5 +1,5 @@
+#define FASTLED_USE_GLOBAL_BRIGHTNESS 1
 #include <FastLED.h>
-
 #define NUM_LEDS 32
 
 struct StatusCode {
